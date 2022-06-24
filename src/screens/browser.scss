@@ -1,0 +1,40 @@
+#browser-app {
+    input.input-search {
+        width: 100%;
+        height: 65%;
+        margin-right: 12px;
+        border: 2px solid #FFFFFF;
+        border-radius: 4px;
+        outline: none;
+        padding-left: 8px;
+        color: #929292;
+    }
+    input.input-search:focus {
+        border: 2px solid #AC0000;
+        color: #000000;
+    }
+    input[type="search"]::-webkit-search-decoration,
+    input[type="search"]::-webkit-search-cancel-button,
+    input[type="search"]::-webkit-search-results-button,
+    input[type="search"]::-webkit-search-results-decoration {
+        -webkit-appearance:none;
+    }
+    div.buttons {
+        i.v-button {
+            cursor: pointer;
+        }
+        i.v-button:hover {
+            color: #FF0000;
+        }
+        i.v-button:active {
+            color: #AC0000;
+        }
+    }
+    .progress-web {
+        position: absolute;
+        left: 0;
+        bottom: 0;
+        width: 100%;
+        height: 10px;
+    }
+}

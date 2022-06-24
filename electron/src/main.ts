@@ -1,16 +1,24 @@
 import { app, BrowserWindow } from "electron";
 import { enable as enableWebContents, initialize as inicializeRemote } from "@electron/remote/main";
-import { initialize as initializeTitlebar } from "electron-react-titlebar/main";
+import electronLocalshortcut from "electron-localshortcut";
 import isDev from "electron-is-dev";
 import serve from "electron-serve";
 import path from "path";
 
+// Otros comandos funcionales.
+const { setupTitlebar, attachTitlebarToWindow } = require("custom-electron-titlebar/main");
+process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
+
+// Variables principales.
 var appWindow: BrowserWindow | null = null;
 var loadURL = serve({ directory: path.join(__dirname, './app/'), scheme: 'app' });
 
 function init() {
+    // Inicializar librerias
     inicializeRemote();
-    initializeTitlebar();
+    setupTitlebar();
+
+    // Crear ventana principal customizada
     appWindow = new BrowserWindow({
         fullscreen: !isDev,
         minHeight: 619,
@@ -22,7 +30,10 @@ function init() {
         icon: `${__dirname}/assets/icon.png`,
         webPreferences: {
             nodeIntegration: true,
-            devTools: isDev
+            contextIsolation: false,
+            webSecurity: false,
+            devTools: isDev,
+            webviewTag: true
         }
     });
     appWindow.menuBarVisible = false;
@@ -30,9 +41,28 @@ function init() {
     (isDev)&&appWindow.webContents.openDevTools();
     (isDev)? appWindow.loadURL("http://localhost:3000/"): loadURL(appWindow);
     enableWebContents(appWindow.webContents);
+    attachTitlebarToWindow(appWindow);
+    
+    // Push FullScreen
+    var waitFullScreen: boolean = false;
+    const changeFullScreen = ()=>{
+        if (!waitFullScreen) {
+            waitFullScreen = true;
+            var isFullScreen = appWindow.isFullScreen();
+            appWindow.setFullScreen(!isFullScreen);
+            return setTimeout(()=>{ waitFullScreen = false; }, 5000);
+        }
+        appWindow.webContents.send('on-message', 'Espere 5 segundos para volver a realizar la acción.');
+    };
+    // Eventos de la ventana principal.
     appWindow.on('closed', ()=>appWindow = null);
+    appWindow.on('enter-full-screen', ()=>appWindow.webContents.send('on-fullscreen', true));
+    appWindow.on('leave-full-screen', ()=>appWindow.webContents.send('on-fullscreen', false));
+    appWindow.on('ready-to-show', ()=>appWindow.webContents.send('on-fullscreen', appWindow.isFullScreen()));
+    electronLocalshortcut.register(appWindow, 'Ctrl+Shift+F', changeFullScreen);
 }
 
+// Eventos principales del proceso.
 app.on('ready', ()=>init());
 app.on('activate', ()=>(appWindow === null)&&init());
 app.on('window-all-closed', ()=>(process.platform !== 'darwin')&&app.quit());

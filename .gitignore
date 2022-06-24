@@ -18,6 +18,8 @@ yarn-error.log
 
 # electron
 electron/app/node_modules/
+electron/build/packager/
+electron/app/app/
 electron/app/yarn.lock
 
 # misc
