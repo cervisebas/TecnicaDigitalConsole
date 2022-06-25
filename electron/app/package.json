@@ -3,8 +3,9 @@
   "version": "1.0.0",
   "description": "TecnicaConsole",
   "main": "main.js",
-  "author": "SCApps",
+  "author": "SCApps <cervisebas@gmail.com>",
   "license": "MIT",
+  "homepage": "",
   "dependencies": {
     "@electron/remote": "^2.0.8",
     "custom-electron-titlebar": "^4.1.0",

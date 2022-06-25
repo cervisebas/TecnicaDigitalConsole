@@ -1,7 +1,9 @@
 {
-  "name": "tecnicaconsole",
+  "name": "TecnicaConsole",
   "version": "0.1.0",
   "private": true,
+  "homepage": "",
+  "author": "SCApps <cervisebas@gmail.com>",
   "dependencies": {
     "@babel/core": "^7.16.0",
     "@electron/remote": "^2.0.8",
@@ -92,6 +94,7 @@
     "test": "node scripts/test.js",
     "main-build": "tsc -p electron/src",
     "electron-build": "node electron/scripts/build.js",
+    "electron-package": "node electron/scripts/package.js",
     "gen-icon": "electron-icon-maker --input=./electron/icon.png --output=./electron",
     "sync": "node sync-git.js",
     "produce": "tsc -p electron/scripts"
@@ -116,7 +119,7 @@
   },
   "devDependencies": {
     "electron": "^19.0.5",
-    "electron-builder": "^23.0.3"
+    "electron-builder": "^23.1.0"
   },
   "jest": {
     "roots": [
