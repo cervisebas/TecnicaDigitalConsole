@@ -93,8 +93,8 @@
     "build": "node scripts/build.js",
     "test": "node scripts/test.js",
     "main-build": "tsc -p electron/src",
-    "electron-build": "node electron/scripts/build.js",
-    "electron-package": "node electron/scripts/package.js",
+    "windows": "node electron/scripts/build.js",
+    "linux": "node electron/scripts/package.js",
     "gen-icon": "electron-icon-maker --input=./electron/icon.png --output=./electron",
     "sync": "node sync-git.js",
     "produce": "tsc -p electron/scripts"

@@ -4,12 +4,12 @@ import pkg from "../../package.json";
 const options: packager.Options = {
     overwrite: true,
     asar: true,
-    platform: ['linux', 'win32'],
+    platform: 'win32',
     arch: 'x64',
     icon: './electron/icons/win/icon.ico',
     prune: true,
     dir: './electron/app',
-    out: './electron/build/packager',
+    out: './electron/build',
     appVersion: pkg.version,
     name: 'TecnicaConsole',
     win32metadata: {

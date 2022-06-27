@@ -8,12 +8,12 @@ var package_json_1 = __importDefault(require("../../package.json"));
 var options = {
     overwrite: true,
     asar: true,
-    platform: ['linux', 'win32'],
+    platform: 'win32',
     arch: 'x64',
     icon: './electron/icons/win/icon.ico',
     prune: true,
     dir: './electron/app',
-    out: './electron/build/packager',
+    out: './electron/build',
     appVersion: package_json_1.default.version,
     name: 'TecnicaConsole',
     win32metadata: {
