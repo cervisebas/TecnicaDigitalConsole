@@ -1,6 +1,14 @@
 import moment from "moment";
+import { Students } from "./ApiTecnica";
+import ScriptGlobal from "./ScriptGlobal";
 
-export default class SyncData {
+declare global {
+    interface Window {
+        startSync: boolean | undefined;
+    }
+}
+
+export default new class SyncData {
     constructor() {
         this.startSync = this.startSync.bind(this);
     }
@@ -19,17 +27,19 @@ export default class SyncData {
         { hour: 17, minMinutes: 0, maxMinutes: 11, result: '16:45' }
     ];
     init() {
+        if (window.startSync == true) return;
+        window.startSync = true;
+        document.dispatchEvent(ScriptGlobal.getEvent('StartSync', false, 'Sincronización en vivo activa.', true, 'AcceptIcon'));
         setInterval(this.startSync, 60000);
     }
     startSync() {
+        console.log("Sync");
         var now: { hour: number, minutes: number } = { hour: parseInt(moment().format('HH')), minutes: parseInt(moment().format('mm')) };
         var find = this.timeSync.find((value)=>{
             if (value.hour == now.hour) {
                 if (now.minutes >= value.minMinutes && now.minutes <= value.maxMinutes) return value;
             }
         });
-        if (find) {
-            
-        }
+        if (find) Students.sendData();
     }
 }

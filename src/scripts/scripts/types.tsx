@@ -8,6 +8,8 @@ type StudentsData = {
     id: string;
     dni: string;
     curse: string;
+    hour: string;
+    date: string;
 };
 
 
@@ -18,8 +20,16 @@ type TimesAccept = {
     result: string;
 };
 
+type AssistList = {
+    curse: string;
+    hour: string;
+    date: string;
+    list: StudentsData[];
+};
+
 export type {
     tipical,
     StudentsData,
-    TimesAccept
+    TimesAccept,
+    AssistList
 };

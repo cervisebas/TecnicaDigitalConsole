@@ -6,11 +6,11 @@ import { ToastContainer, toast } from 'react-toastify';
 import Theme from './Theme';
 import Console from './screens/console';
 import Config from './screens/config';
-import { Students } from './scripts/ApiTecnica';
 import ApiConsole from './scripts/ApiConsole';
 import 'react-toastify/dist/ReactToastify.css';
 import { ipcRenderer } from 'electron';
 import BrowserPage from './screens/browser';
+import SyncData from './scripts/SyncData';
 
 type IProps = {};
 type IState = {
@@ -20,8 +20,8 @@ type IState = {
 
 declare global {
   interface Window {
-    Students: any;
     activeConsole: boolean | undefined;
+    startEventsApp: boolean | undefined;
   }
 }
 
@@ -49,17 +49,20 @@ export default class App extends Component<IProps, IState> {
       }
     });
     setIconOptions({ disableWarnings: true });
-    window.Students = Students;
     ApiConsole.init();
-    document.dispatchEvent(ApiConsole.getEvent('load-0', true, 'Cargando lista de alumnos...', false));
-    Students.getAll()
-      .then(()=>{
-        window.activeConsole = true;
-        document.dispatchEvent(ApiConsole.getEvent('load-0', false, 'El listado de alumnos se guardo y almaceno de forma correcta.', true, 'AcceptIcon'));
-      })
-      .catch(()=>document.dispatchEvent(ApiConsole.getEvent('load-0', false, 'Ocurrió un error al cargar el listado de alumnos.', true, 'CancelIcon')));
+    SyncData.init();
+    ApiConsole.syncStudents();
+    this.startEvents();
   }
-  getTabId(itemKey: string) { return `pivot_panel_${itemKey}`; };
+  startEvents() {
+    if (window.startEventsApp) return;
+    window.startEventsApp = true;
+    document.addEventListener('show-toast', (ev: any)=>toast.info(ev.detail.message, { theme: 'dark' }), false);
+    document.addEventListener('change-page', (ev: any)=>this.setState({ selectKey: ev.detail.page }), false);
+  }
+  getTabId(itemKey: string) {
+    return `pivot_panel_${itemKey}`;
+  };
   render(): React.ReactNode {
     return(<ThemeProvider theme={Theme} style={{ width: '100%', height: '100%' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
@@ -93,19 +96,3 @@ export default class App extends Component<IProps, IState> {
     </ThemeProvider>);
   }
 }
-
-/*
-
-const appTheme: PartialTheme = {
-  palette: {
-    themePrimary: 'red'
-    ...
-  }
-};
-
-export const App = () => (
-  <ThemeProvider theme={appTheme}>
-    App content ...
-  </ThemeProvider>
-);
-*/
