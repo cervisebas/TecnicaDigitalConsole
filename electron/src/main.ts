@@ -59,16 +59,22 @@ function init() {
     appWindow.on('enter-full-screen', ()=>appWindow.webContents.send('on-fullscreen', true));
     appWindow.on('leave-full-screen', ()=>appWindow.webContents.send('on-fullscreen', false));
     appWindow.on('ready-to-show', ()=>appWindow.webContents.send('on-fullscreen', appWindow.isFullScreen()));
-    appWindow.on('close', async (event)=>{
+    appWindow.on('close', async(event)=>{
+        event.preventDefault();
         const { response } = await dialog.showMessageBox(appWindow, {
             type: 'question',
             buttons: ["Aceptar", "Cancelar"],
             title: "¡¡¡Espere por favor!!!",
             message: "Estas apunto de cerrar la aplicación.\n¿Estás seguro que quieres realizar esta acción?"
         });
-        if (response !== 0) event.preventDefault();
+        if (response == 0) {
+            appWindow.destroy();
+            (process.platform !== "darwin")&&app.quit();
+            return;
+        }
+        console.log('Cancel');
     });
-    appWindow.webContents.addListener('before-input-event', (event, input)=>(input.code == 'F4' && input.alt) && event.preventDefault());
+    appWindow.webContents.on("before-input-event", (event,input)=>(input.code=='F4'&&input.alt)&&event.preventDefault());
     electronLocalshortcut.register(appWindow, 'Ctrl+Shift+F', changeFullScreen);
 }
 

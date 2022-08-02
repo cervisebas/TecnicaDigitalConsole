@@ -31,15 +31,18 @@ export default class Console extends Component<IProps, IState> {
     componentWillUnmount() {
         document.removeEventListener('update-console-render', this.initEvent, false);
     }
+    scrollToBottom() {
+        document.getElementById('scroll-principal')?.scrollTo(0, this.state.itemArray.length * 36);
+    }
     initEvent(data: any) {
         var findIndex = this.state.itemArray.findIndex((v)=>v.class == data.detail.class);
         var itemArray = this.state.itemArray;
         if (findIndex !== -1) {
             itemArray[findIndex] = data.detail;
-            this.setState({ itemArray: itemArray });
+            this.setState({ itemArray: itemArray }, this.scrollToBottom);
         } else {
             itemArray.push(data.detail);
-            this.setState({ itemArray: itemArray });
+            this.setState({ itemArray: itemArray }, this.scrollToBottom);
         }
     }
     render(): React.ReactNode {

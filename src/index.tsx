@@ -18,7 +18,7 @@ var titleOptions: TitlebarOptions = {
 var titleBar: any = new Titlebar(titleOptions);
 
 ipcRenderer.on('on-fullscreen', (_ev, value: boolean)=>{
-  if (!value) return (titleBar == null)&&new Titlebar(titleOptions);
+  if (!value) return (titleBar == null)&&(titleBar = new Titlebar(titleOptions));
   if (titleBar !== null) {
     titleBar.dispose();
     titleBar = null;

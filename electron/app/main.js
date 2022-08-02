@@ -100,21 +100,27 @@ function init() {
         var response;
         return __generator(this, function (_a) {
             switch (_a.label) {
-                case 0: return [4 /*yield*/, electron_1.dialog.showMessageBox(appWindow, {
-                        type: 'question',
-                        buttons: ["Aceptar", "Cancelar"],
-                        title: "¡¡¡Espere por favor!!!",
-                        message: "Estas apunto de cerrar la aplicación.\n¿Estás seguro que quieres realizar esta acción?"
-                    })];
+                case 0:
+                    event.preventDefault();
+                    return [4 /*yield*/, electron_1.dialog.showMessageBox(appWindow, {
+                            type: 'question',
+                            buttons: ["Aceptar", "Cancelar"],
+                            title: "¡¡¡Espere por favor!!!",
+                            message: "Estas apunto de cerrar la aplicación.\n¿Estás seguro que quieres realizar esta acción?"
+                        })];
                 case 1:
                     response = (_a.sent()).response;
-                    if (response !== 0)
-                        event.preventDefault();
+                    if (response == 0) {
+                        appWindow.destroy();
+                        (process.platform !== "darwin") && electron_1.app.quit();
+                        return [2 /*return*/];
+                    }
+                    console.log('Cancel');
                     return [2 /*return*/];
             }
         });
     }); });
-    appWindow.webContents.addListener('before-input-event', function (event, input) { return (input.code == 'F4' && input.alt) && event.preventDefault(); });
+    appWindow.webContents.on("before-input-event", function (event, input) { return (input.code == 'F4' && input.alt) && event.preventDefault(); });
     electron_localshortcut_1.default.register(appWindow, 'Ctrl+Shift+F', changeFullScreen);
 }
 // Eventos principales del proceso.

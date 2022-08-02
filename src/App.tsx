@@ -71,12 +71,12 @@ export default class App extends Component<IProps, IState> {
           selectedKey={this.state.selectKey}
           onLinkClick={(key)=>this.setState({ selectKey: key?.props.itemKey!, mountBrowser: true })}
           getTabId={this.getTabId}
-          style={{ paddingLeft: 16 }}>
+          style={{ paddingLeft: 16, position: 'relative' }}>
           <PivotItem headerText="Consola" itemKey='console' />
           <PivotItem headerText="Navegador WEB" itemKey='browser' />
-          <PivotItem headerText="Configuraciones" itemKey='config' />
+          <PivotItem headerText="Configuraciones" itemKey='config' />¿
         </Pivot>
-        <div className={'custom-scroll'} aria-labelledby={this.getTabId(this.state.selectKey)} role={'tabpanel'} style={{ width: '100%', height: '100%', backgroundColor: '#000000', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
+        <div className={'custom-scroll'} id={'scroll-principal'} aria-labelledby={this.getTabId(this.state.selectKey)} role={'tabpanel'} style={{ width: '100%', height: '100%', backgroundColor: '#000000', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
           <Console style={{ display: (this.state.selectKey == 'console')? undefined: 'none' }} />
           <Config style={{ display: (this.state.selectKey == 'config')? undefined: 'none' }} />
           {(this.state.mountBrowser)&&<BrowserPage style={{ display: (this.state.selectKey == 'browser')? undefined: 'none' }} />}
