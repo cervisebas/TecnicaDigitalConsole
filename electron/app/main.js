@@ -45,7 +45,7 @@ var electron_localshortcut_1 = __importDefault(require("electron-localshortcut")
 var electron_is_dev_1 = __importDefault(require("electron-is-dev"));
 var electron_serve_1 = __importDefault(require("electron-serve"));
 var path_1 = __importDefault(require("path"));
-// Otros comandos funcionales.
+// Otros comandos de funciones.
 var _a = require("custom-electron-titlebar/main"), setupTitlebar = _a.setupTitlebar, attachTitlebarToWindow = _a.attachTitlebarToWindow;
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 // Variables principales.

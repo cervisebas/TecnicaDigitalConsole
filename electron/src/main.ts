@@ -5,7 +5,7 @@ import isDev from "electron-is-dev";
 import serve from "electron-serve";
 import path from "path";
 
-// Otros comandos funcionales.
+// Otros comandos de funciones.
 const { setupTitlebar, attachTitlebarToWindow } = require("custom-electron-titlebar/main");
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 

@@ -124,6 +124,7 @@ export default class BrowserPage extends PureComponent<IProps, IState> {
                 <webview
                     ref={(e: any)=>this.webview = e}
                     src={'https://google.com/'}
+                    useragent={'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36.0 (KHTML, like Gecko) Chrome/102.0.5005.148 Safari/537.36.0'}
                     style={{
                         width: '100%',
                         height: '100%',

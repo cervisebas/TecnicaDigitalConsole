@@ -50,21 +50,21 @@ export default new class ApiConsole {
         document.dispatchEvent(ScriptGlobal.getEvent(className, true, 'Procesando código de barras...', false));
         await this.waitTime();
         if (this.checkCode(code)) {
-            if (this.checkHour()) {
-                return Students.getAll().then((values)=>{
-                    var dni = code.replace('eest', '');
-                    var find = values.find((v)=>decode(v.dni) == dni);
-                    if (find) {
+            return Students.getAll().then((values)=>{
+                var dni = code.replace('eest', '');
+                var find = values.find((v)=>decode(v.dni) == dni);
+                if (find) {
+                    if (this.checkHour()) {
                         var res = this.pushAssist(find);
-                        if (res == 2) return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `La asistencia ya ha sido registrada anteriormente.`, false));
+                        if (res == 2) return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `La asistencia ya ha sido registrada anteriormente #${this.processId(find.id)}.`, false));
                         return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `Se proceso la asistencia del alumno #${this.processId(find.id)}`, true, 'AcceptIcon', 'green'));
                     }
-                    return document.dispatchEvent(ScriptGlobal.getEvent(className, false, 'No se encontró un alumno registrado.', true, 'CancelIcon', 'red'));
-                });
-            }
-            return document.dispatchEvent(ScriptGlobal.getEvent(className, false, 'No se encontró un tiempo valido registrado.', true, 'CancelIcon', 'red'));
+                    return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `No se encontró un tiempo valido registrado #${this.processId(find.id)}.`, true, 'CancelIcon', 'red'));
+                }
+                return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `No se encontró un alumno registrado ("${code}").`, true, 'CancelIcon', 'red'));
+            });
         }
-        document.dispatchEvent(ScriptGlobal.getEvent(className, false, 'No se reconoció el código de barras.', true, 'CancelIcon', 'red'));
+        document.dispatchEvent(ScriptGlobal.getEvent(className, false, `No se reconoció el código de barras ("${code}").`, true, 'CancelIcon', 'red'));
     }
     pushAssist(data: StudentsData): number {
         var newList = window.listAssist!;
