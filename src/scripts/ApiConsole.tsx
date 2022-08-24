@@ -118,7 +118,7 @@ export default new class ApiConsole {
         var times: TimesAccept[] = [
         /* ##### Mañana ##### */
             /* ##### 7:15 ##### */
-            { hour: 7, minMinutes: 0, maxMinutes: 30, result: '7:15' },
+            { hour: 7, minMinutes: 0, maxMinutes: 45, result: '7:15' },
             /* ##### 8:40 ##### */
             { hour: 8, minMinutes: 25, maxMinutes: 55, result: '8:40' },
             /* ##### 9:50 ##### */
@@ -143,8 +143,9 @@ export default new class ApiConsole {
             }
         });
         if (get) return (find)? find.result: false;
-        if (find) return true;
-        return false;
+        /*if (find) return true;
+        return false;*/
+        return !!find;
         //return true;
     }
     waitTime() { return new Promise((res)=>setTimeout(()=>res(true), 1200)); }

@@ -13,7 +13,7 @@ export default new class SyncData {
         this.startSync = this.startSync.bind(this);
     }
     private timeSync = [
-        { hour: 7, minMinutes: 31, maxMinutes: 46, result: '7:15' },
+        { hour: 7, minMinutes: 46, maxMinutes: 59, result: '7:15' },
         { hour: 8, minMinutes: 56, maxMinutes: 59, result: '8:40' },
         { hour: 9, minMinutes: 0, maxMinutes: 11, result: '8:40' },
         { hour: 9, minMinutes: 51, maxMinutes: 59, result: '9:50' },

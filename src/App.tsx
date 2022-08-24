@@ -15,7 +15,7 @@ import SyncData from './scripts/SyncData';
 type IProps = {};
 type IState = {
   selectKey: string;
-  mountBrowser: boolean;
+  //mountBrowser: boolean;
 };
 
 declare global {
@@ -32,9 +32,10 @@ export default class App extends Component<IProps, IState> {
     super(props);
     this.state = {
       selectKey: 'console',
-      mountBrowser: false
+      //mountBrowser: false
     };
     this.getTabId = this.getTabId.bind(this);
+    this._onLinkClick = this._onLinkClick.bind(this);
   }
   componentDidMount() {
     registerIcons({
@@ -62,14 +63,20 @@ export default class App extends Component<IProps, IState> {
   }
   getTabId(itemKey: string) {
     return `pivot_panel_${itemKey}`;
-  };
+  }
+  _onLinkClick(item: PivotItem | undefined) {
+    //console.log(item);
+    this.setState({ selectKey: item?.props.itemKey! });
+    //(item?.props.itemKey && !this.state.mountBrowser)&&this.setState({ mountBrowser: true });
+  }
   render(): React.ReactNode {
     return(<ThemeProvider theme={Theme} style={{ width: '100%', height: '100%' }}>
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', width: '100%', height: '100%' }}>
         <Pivot
           headersOnly={true}
           selectedKey={this.state.selectKey}
-          onLinkClick={(key)=>this.setState({ selectKey: key?.props.itemKey!, mountBrowser: true })}
+          //onLinkClick={(key)=>this.setState({ selectKey: key?.props.itemKey!, mountBrowser: true })}
+          onLinkClick={this._onLinkClick}
           getTabId={this.getTabId}
           style={{ paddingLeft: 16, position: 'relative' }}>
           <PivotItem headerText="Consola" itemKey='console' />
@@ -79,7 +86,7 @@ export default class App extends Component<IProps, IState> {
         <div className={'custom-scroll'} id={'scroll-principal'} aria-labelledby={this.getTabId(this.state.selectKey)} role={'tabpanel'} style={{ width: '100%', height: '100%', backgroundColor: '#000000', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
           <Console style={{ display: (this.state.selectKey == 'console')? undefined: 'none' }} />
           <Config style={{ display: (this.state.selectKey == 'config')? undefined: 'none' }} />
-          {(this.state.mountBrowser)&&<BrowserPage style={{ display: (this.state.selectKey == 'browser')? undefined: 'none' }} />}
+          <BrowserPage style={{ display: (this.state.selectKey == 'browser')? undefined: 'none' }} />
         </div>
       </div>
       <ToastContainer
