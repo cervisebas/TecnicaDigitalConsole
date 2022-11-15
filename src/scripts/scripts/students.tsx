@@ -45,7 +45,7 @@ export default class StudentSystem {
         });
     }
     sendData(force?: boolean | undefined) {
-        var className = (Math.floor(Math.random() * (9999999 - 1000000)) + 1000000).toString();
+        const className = (Math.floor(Math.random() * (9999999 - 1000000)) + 1000000).toString();
         if (!window.listAssist) {
             (force)&&document.dispatchEvent(ScriptGlobal.getEvent(className, false, `No se encontraron datos que enviar.`, true, 'CancelIcon', 'red'));
             return;
@@ -58,14 +58,14 @@ export default class StudentSystem {
         window.activeConsole = false;
         this.onConsult = true;
         document.dispatchEvent(ScriptGlobal.getEvent(className, true, 'Enviando datos de asistencia...', false));
-        var postData = qs.stringify({
+        const postData = qs.stringify({
             ...this.dataVerify,
             data: encode(JSON.stringify(window.listAssist)),
             setConsoleListAssist: true
         });
         axios.post(`${this.urlBase}/index.php`, postData, this.header_access).then((html)=>{
             try {
-                var result: tipical = html.data;
+                const result: tipical = html.data;
                 if (result.ok) {
                     window.listAssist = [];
                     window.activeConsole = true;
@@ -84,6 +84,34 @@ export default class StudentSystem {
             window.activeConsole = true;
             this.onConsult = false;
             return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `Ocurrió un error de red al enviar los datos de asistencia.`, true, 'CancelIcon', 'red'));
+        });
+    }
+    sendDataTeacher(idTeacher: string, time: string): Promise<void> {
+        return new Promise((resolve, reject: (reason: { cause: string; code: number; })=>void)=>{
+            const postData = qs.stringify({
+                ...this.dataVerify,
+                setTeacherConsole: true,
+                idTeacher,
+                time: encode(time)
+            });
+            axios.post(`${this.urlBase}/index.php`, postData, this.header_access).then((html)=>{
+                try {
+                    const result: tipical = html.data;
+                    if (result.ok) resolve();
+                    console.log(result);
+                    return reject((result.cause)? (result.cause == 'exist-row')? { cause: 'Ya se registro la asistencia del docente', code: 0 }: { cause: result.cause, code: 1 }: { cause: 'Ocurrió un error inesperado al enviar los datos de asistencia', code: 1 });
+                } catch {
+                    return reject({
+                        cause: 'Ocurrió un error inesperado al enviar los datos de asistencia',
+                        code: 1
+                    });
+                }
+            }).catch(()=>{
+                return reject({
+                    cause: 'Ocurrió un error de red al enviar los datos de asistencia',
+                    code: 1
+                });
+            });
         });
     }
 }

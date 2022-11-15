@@ -6,7 +6,7 @@ import './index.scss';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { ipcRenderer } from 'electron';
-import { TitlebarOptions } from 'custom-electron-titlebar/dist/interfaces';
+import { TitlebarOptions } from 'custom-electron-titlebar/dist/types/titlebar-options';
 
 var titleOptions: TitlebarOptions = {
   backgroundColor: Color.fromHex('#0c0c0c'),

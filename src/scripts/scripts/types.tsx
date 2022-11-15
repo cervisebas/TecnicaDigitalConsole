@@ -27,9 +27,16 @@ type AssistList = {
     list: StudentsData[];
 };
 
+type AssistTurnsList = {
+    date: string;
+    turn: string;
+    listIds: string[];
+};
+
 export type {
     tipical,
     StudentsData,
     TimesAccept,
-    AssistList
+    AssistList,
+    AssistTurnsList
 };

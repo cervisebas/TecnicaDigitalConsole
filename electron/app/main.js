@@ -50,12 +50,59 @@ var _a = require("custom-electron-titlebar/main"), setupTitlebar = _a.setupTitle
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 // Variables principales.
 var appWindow = null;
+var splashscreen = null;
 var loadURL = (0, electron_serve_1.default)({ directory: path_1.default.join(__dirname, './app/'), scheme: 'app' });
 function init() {
     var _this = this;
     // Inicializar librerias
     (0, main_1.initialize)();
     setupTitlebar();
+    // Pantalla de carga
+    splashscreen = new electron_1.BrowserWindow({
+        fullscreen: true,
+        resizable: false,
+        frame: true,
+        transparent: true,
+        show: false,
+        autoHideMenuBar: true,
+        alwaysOnTop: true,
+        icon: "".concat(__dirname, "/assets/icon.png"),
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+            webSecurity: false,
+            //devTools: isDev,
+            webviewTag: true
+        }
+    });
+    splashscreen.menuBarVisible = false;
+    splashscreen.removeMenu();
+    splashscreen.loadFile('splashscreen/index.html');
+    splashscreen.once('ready-to-show', function () { return __awaiter(_this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    splashscreen.show();
+                    return [4 /*yield*/, waitTo(5000)];
+                case 1:
+                    _a.sent();
+                    splashscreen.webContents.executeJavaScript('window.goStart()');
+                    goWindowApp();
+                    return [4 /*yield*/, waitTo(4000)];
+                case 2:
+                    _a.sent();
+                    appWindow.show();
+                    return [4 /*yield*/, waitTo(6000)];
+                case 3:
+                    _a.sent();
+                    splashscreen.hide();
+                    return [2 /*return*/];
+            }
+        });
+    }); });
+}
+function goWindowApp() {
+    var _this = this;
     // Crear ventana principal customizada
     appWindow = new electron_1.BrowserWindow({
         fullscreen: !electron_is_dev_1.default,
@@ -63,7 +110,7 @@ function init() {
         minWidth: 886,
         darkTheme: true,
         frame: false,
-        show: true,
+        show: false,
         autoHideMenuBar: true,
         icon: "".concat(__dirname, "/assets/icon.png"),
         webPreferences: {
@@ -90,6 +137,10 @@ function init() {
             return setTimeout(function () { waitFullScreen = false; }, 5000);
         }
         appWindow.webContents.send('on-message', 'Espere 5 segundos para volver a realizar la acción.');
+    };
+    var openDevTools = function () {
+        if (electron_is_dev_1.default)
+            appWindow.webContents.openDevTools();
     };
     // Eventos de la ventana principal.
     appWindow.on('closed', function () { return appWindow = null; });
@@ -122,8 +173,13 @@ function init() {
     }); });
     appWindow.webContents.on("before-input-event", function (event, input) { return (input.code == 'F4' && input.alt) && event.preventDefault(); });
     electron_localshortcut_1.default.register(appWindow, 'Ctrl+Shift+F', changeFullScreen);
+    electron_localshortcut_1.default.register(appWindow, 'Ctrl+Shift+I', openDevTools);
+}
+// Utils
+function waitTo(time) {
+    return new Promise(function (resolve) { return setTimeout(resolve, time); });
 }
 // Eventos principales del proceso.
-electron_1.app.on('ready', function () { return init(); });
+electron_1.app.on('ready', function () { return setTimeout(init, 3000); });
 electron_1.app.on('activate', function () { return (appWindow === null) && init(); });
 electron_1.app.on('window-all-closed', function () { return (process.platform !== 'darwin') && electron_1.app.quit(); });

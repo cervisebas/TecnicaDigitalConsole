@@ -24,12 +24,15 @@ export default class Console extends Component<IProps, IState> {
             itemArray: []
         };
         this.initEvent = this.initEvent.bind(this);
+        this.clearConsole = this.clearConsole.bind(this);
     }
     componentDidMount() {
         document.addEventListener('update-console-render', this.initEvent, false);
+        document.addEventListener('clear-console-render', this.clearConsole, false);
     }
     componentWillUnmount() {
         document.removeEventListener('update-console-render', this.initEvent, false);
+        document.removeEventListener('clear-console-render', this.clearConsole, false);
     }
     scrollToBottom() {
         document.getElementById('scroll-principal')?.scrollTo(0, this.state.itemArray.length * 36);
@@ -44,6 +47,9 @@ export default class Console extends Component<IProps, IState> {
             itemArray.push(data.detail);
             this.setState({ itemArray: itemArray }, this.scrollToBottom);
         }
+    }
+    clearConsole() {
+        this.setState({ itemArray: [] });
     }
     render(): React.ReactNode {
         return(<div style={{ ...this.props.style, flex: 1, width: '100%', height: '100%', flexDirection: 'column' }}>

@@ -12,4 +12,7 @@ export default new class ScriptGlobal {
             }
         });
     }
+    clearConsole() {
+        return document.dispatchEvent(new CustomEvent('clear-console-render', { detail: {} }));
+    }
 }

@@ -3,28 +3,53 @@ import moment from "moment";
 import BarcodeScanner from "simple-barcode-scanner";
 import { Students } from "./ApiTecnica";
 import ScriptGlobal from "./ScriptGlobal";
-import { AssistList, StudentsData, TimesAccept } from "./scripts/types";
+import { AssistList, AssistTurnsList, StudentsData, TimesAccept } from "./scripts/types";
+import { startTimer } from "./Utils";
 
 declare global {
     interface Window {
         testBarCode: (code: string)=>any;
+        testListAssistTurns: (idStudent: string)=>void;
         listAssist: AssistList[] | undefined;
+        listAssistTurns: AssistTurnsList[] | undefined;
         activeConsole: boolean | undefined;
     }
 };
 
 const scanner = BarcodeScanner();
+var dayNow = moment().format('DD/MM');
 
 export default new class ApiConsole {
     constructor() {
         this.processNow = this.processNow.bind(this);
         this.syncStudents = this.syncStudents.bind(this);
+        this.detectDay = this.detectDay.bind(this);
+        this.reSyncStudents = this.reSyncStudents.bind(this);
+        this.checkTurn = this.checkTurn.bind(this);
     }
     private onRequestStudents: boolean = false;
+    private firsBoot: boolean = false;
     init() {
         scanner.on(this.processNow);
         window.testBarCode = (code: string)=>this.processNow(code);
+        window.testListAssistTurns = this.checkTurn;
+        this.detectDay();
+        this.reSyncStudents();
         document.dispatchEvent(ScriptGlobal.getEvent('StartEvents', false, 'Eventos iniciados.', true, 'AcceptIcon'));
+    }
+    async detectDay() {
+        const here = moment().format('DD/MM');
+        if (dayNow !== here) {
+            dayNow = here;
+            ScriptGlobal.clearConsole();
+            window.listAssistTurns = [];
+            setTimeout(()=>document.dispatchEvent(ScriptGlobal.getEvent('StartEvents', false, 'Consola limpiada.', true, 'AcceptIcon')), 500);
+        }
+        setTimeout(this.detectDay, 5000);
+    }
+    reSyncStudents() {
+        if (this.firsBoot) this.syncStudents(true); else this.firsBoot = true;
+        setTimeout(this.reSyncStudents, 3600000);
     }
     syncStudents(force?: boolean | undefined) {
         if (this.onRequestStudents) return;
@@ -44,18 +69,20 @@ export default new class ApiConsole {
             });
     }
     async processNow(code: string, event?: KeyboardEvent | undefined) {
-        (event)&&event.preventDefault();
+        if (event) event.preventDefault();
         if (!window.activeConsole) return;
-        var className = (Math.floor(Math.random() * (9999999 - 1000000)) + 1000000).toString();
+        const className = (Math.floor(Math.random() * (9999999 - 1000000)) + 1000000).toString();
         document.dispatchEvent(ScriptGlobal.getEvent(className, true, 'Procesando código de barras...', false));
         await this.waitTime();
         if (this.checkCode(code)) {
             return Students.getAll().then((values)=>{
-                var dni = code.replace('eest', '');
-                var find = values.find((v)=>decode(v.dni) == dni);
+                const dni = code.replace('eest', '');
+                const find = values.find((v)=>decode(v.dni) == dni);
                 if (find) {
+                    if (find.curse == 'RG9jZW50ZQ==') return this.processTeacher(find, code, className);
                     if (this.checkHour()) {
-                        var res = this.pushAssist(find);
+                        if (this.checkTurn(find.id)) return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `La asistencia ya ha sido registrada hoy #${this.processId(find.id)}.`, false));
+                        const res = this.pushAssist(find);
                         if (res == 2) return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `La asistencia ya ha sido registrada anteriormente #${this.processId(find.id)}.`, false));
                         return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `Se proceso la asistencia del alumno #${this.processId(find.id)}`, true, 'AcceptIcon', 'green'));
                     }
@@ -65,6 +92,48 @@ export default new class ApiConsole {
             });
         }
         document.dispatchEvent(ScriptGlobal.getEvent(className, false, `No se reconoció el código de barras ("${code}").`, true, 'CancelIcon', 'red'));
+    }
+    processTeacher(data: StudentsData, _code: string, className: string) {
+        if (this.checkHourTeacher()) {
+            document.dispatchEvent(ScriptGlobal.getEvent(className, true, `Enviando datos del docente #${this.processId(data.id)}...`, false));
+            return Students.sendDataTeacher(data.id, moment().format('HH:mm'))
+                .then(()=>document.dispatchEvent(ScriptGlobal.getEvent(className, false, `Se proceso la asistencia del docente #${this.processId(data.id)}`, true, 'AcceptIcon', 'green')))
+                .catch(({ cause, code })=>{
+                    const reIntent = code == 1;
+                    document.dispatchEvent(ScriptGlobal.getEvent(className, false, `${cause} - ${(reIntent)? 'Reintentando en 00:30 minutos...': 'Sin reintentos.'}`, true, 'CancelIcon', 'red'));
+                    if (reIntent) {
+                        setTimeout(()=>this.processTeacher(data, _code, className), 30000);
+                        startTimer(29, (time)=>document.dispatchEvent(ScriptGlobal.getEvent(className, false, `${cause} - ${`Reintentando en ${time} minutos...`}`, true, 'CancelIcon', 'red')));
+                    }
+                })
+        }
+        return document.dispatchEvent(ScriptGlobal.getEvent(className, false, `No se encontró un tiempo valido registrado #${this.processId(data.id)}.`, true, 'CancelIcon', 'red'));
+    }
+    checkTurn(idStudent: string) {
+        const nowDate = moment().format('DD/MM/YYYY');
+        const nowHour = this.checkHour(true) as string;
+        const nowTurn = (nowHour == '7:15' || nowHour == '8:40' || nowHour == '9:50' || nowHour == '11:00')? 'morning': 'afternoon';
+        if (window.listAssistTurns) {
+            const findForTime = window.listAssistTurns.findIndex(({ date, turn })=>(date == nowDate && turn == nowTurn));
+            if (findForTime !== -1) {
+                const findStudent = window.listAssistTurns[findForTime].listIds.find((v)=>v == idStudent);
+                if (findStudent) return true;
+                window.listAssistTurns[findForTime].listIds.push(idStudent);
+                return false;
+            }
+            window.listAssistTurns.push({
+                date: nowDate,
+                turn: nowTurn,
+                listIds: [idStudent]
+            });
+            return false;
+        }
+        window.listAssistTurns = [{
+            date: nowDate,
+            turn: nowTurn,
+            listIds: [idStudent]
+        }];
+        return false;
     }
     pushAssist(data: StudentsData): number {
         var newList = window.listAssist!;
@@ -147,6 +216,31 @@ export default new class ApiConsole {
         return false;*/
         return !!find;
         //return true;
+    }
+    checkHourTeacher() {
+        const now: { hour: number, minutes: number } = { hour: parseInt(moment().format('HH')), minutes: parseInt(moment().format('mm')) };
+        const times: TimesAccept[] = [
+            /* ##### Mañana ##### */
+            { hour: 7, minMinutes: 0, maxMinutes: 59, result: '7:15' },
+            { hour: 8, minMinutes: 0, maxMinutes: 59, result: '7:15' },
+            { hour: 9, minMinutes: 0, maxMinutes: 59, result: '7:15' },
+            { hour: 10, minMinutes: 0, maxMinutes: 59, result: '7:15' },
+            { hour: 11, minMinutes: 0, maxMinutes: 59, result: '7:15' },
+            { hour: 12, minMinutes: 0, maxMinutes: 15, result: '7:15' },
+            /* ##### Tarde ##### */
+            { hour: 12, minMinutes: 30, maxMinutes: 59, result: '13:15' },
+            { hour: 13, minMinutes: 0, maxMinutes: 59, result: '13:15' },
+            { hour: 14, minMinutes: 0, maxMinutes: 59, result: '13:15' },
+            { hour: 15, minMinutes: 0, maxMinutes: 59, result: '13:15' },
+            { hour: 16, minMinutes: 0, maxMinutes: 59, result: '13:15' },
+            { hour: 17, minMinutes: 0, maxMinutes: 45, result: '13:15' }
+        ];
+        var find = times.find((value)=>{
+            if (value.hour == now.hour)
+                if (now.minutes >= value.minMinutes && now.minutes <= value.maxMinutes)
+                    return value;
+        });
+        return !!find;
     }
     waitTime() { return new Promise((res)=>setTimeout(()=>res(true), 1200)); }
 }

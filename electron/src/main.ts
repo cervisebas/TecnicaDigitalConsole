@@ -11,13 +11,48 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = 'true';
 
 // Variables principales.
 var appWindow: BrowserWindow | null = null;
-var loadURL = serve({ directory: path.join(__dirname, './app/'), scheme: 'app' });
+var splashscreen: BrowserWindow | null = null;
+const loadURL = serve({ directory: path.join(__dirname, './app/'), scheme: 'app' });
 
 function init() {
     // Inicializar librerias
     inicializeRemote();
     setupTitlebar();
 
+    // Pantalla de carga
+    splashscreen = new BrowserWindow({
+        fullscreen: true,
+        resizable: false,
+        frame: true,
+        transparent: true,
+        show: false,
+        autoHideMenuBar: true,
+        alwaysOnTop: true,
+        icon: `${__dirname}/assets/icon.png`,
+        webPreferences: {
+            nodeIntegration: true,
+            contextIsolation: false,
+            webSecurity: false,
+            //devTools: isDev,
+            webviewTag: true
+        }
+    });
+    splashscreen.menuBarVisible = false;
+    splashscreen.removeMenu();
+    splashscreen.loadFile('splashscreen/index.html');
+    splashscreen.once('ready-to-show', async()=>{
+        splashscreen.show();
+        await waitTo(5000);
+        splashscreen.webContents.executeJavaScript('window.goStart()');
+        goWindowApp();
+        await waitTo(4000);
+        appWindow.show();
+        await waitTo(6000);
+        splashscreen.hide();
+    });
+}
+
+function goWindowApp() {
     // Crear ventana principal customizada
     appWindow = new BrowserWindow({
         fullscreen: !isDev,
@@ -25,7 +60,7 @@ function init() {
         minWidth: 886,
         darkTheme: true,
         frame: false,
-        show: true,
+        show: false,
         autoHideMenuBar: true,
         icon: `${__dirname}/assets/icon.png`,
         webPreferences: {
@@ -54,6 +89,9 @@ function init() {
         }
         appWindow.webContents.send('on-message', 'Espere 5 segundos para volver a realizar la acción.');
     };
+    const openDevTools = ()=>{
+        if (isDev) appWindow.webContents.openDevTools();
+    };
     // Eventos de la ventana principal.
     appWindow.on('closed', ()=>appWindow = null);
     appWindow.on('enter-full-screen', ()=>appWindow.webContents.send('on-fullscreen', true));
@@ -76,9 +114,15 @@ function init() {
     });
     appWindow.webContents.on("before-input-event", (event,input)=>(input.code=='F4'&&input.alt)&&event.preventDefault());
     electronLocalshortcut.register(appWindow, 'Ctrl+Shift+F', changeFullScreen);
+    electronLocalshortcut.register(appWindow, 'Ctrl+Shift+I', openDevTools);
+}
+
+// Utils
+function waitTo(time: number): Promise<void> {
+    return new Promise((resolve)=>setTimeout(resolve, time));
 }
 
 // Eventos principales del proceso.
-app.on('ready', ()=>init());
+app.on('ready', ()=>setTimeout(init, 3000));
 app.on('activate', ()=>(appWindow === null)&&init());
 app.on('window-all-closed', ()=>(process.platform !== 'darwin')&&app.quit());
