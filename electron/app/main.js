@@ -60,23 +60,20 @@ function init() {
     // Pantalla de carga
     splashscreen = new electron_1.BrowserWindow({
         fullscreen: true,
-        resizable: false,
+        minHeight: 619,
+        minWidth: 886,
+        //resizable: false,
         frame: true,
-        transparent: true,
-        show: false,
-        autoHideMenuBar: true,
+        show: true,
         alwaysOnTop: true,
         icon: "".concat(__dirname, "/assets/icon.png"),
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
             webSecurity: false,
-            //devTools: isDev,
-            webviewTag: true
+            devTools: false
         }
     });
-    splashscreen.menuBarVisible = false;
-    splashscreen.removeMenu();
     splashscreen.loadFile('splashscreen/index.html');
     splashscreen.once('ready-to-show', function () { return __awaiter(_this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -88,13 +85,10 @@ function init() {
                     _a.sent();
                     splashscreen.webContents.executeJavaScript('window.goStart()');
                     goWindowApp();
-                    return [4 /*yield*/, waitTo(4000)];
+                    return [4 /*yield*/, waitTo(6000)];
                 case 2:
                     _a.sent();
                     appWindow.show();
-                    return [4 /*yield*/, waitTo(6000)];
-                case 3:
-                    _a.sent();
                     splashscreen.hide();
                     return [2 /*return*/];
             }
@@ -118,7 +112,7 @@ function goWindowApp() {
             contextIsolation: false,
             webSecurity: false,
             devTools: electron_is_dev_1.default,
-            webviewTag: true
+            //webviewTag: true
         }
     });
     appWindow.menuBarVisible = false;

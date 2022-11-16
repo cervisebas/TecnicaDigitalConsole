@@ -22,32 +22,30 @@ function init() {
     // Pantalla de carga
     splashscreen = new BrowserWindow({
         fullscreen: true,
+        minHeight: 619,
+        minWidth: 886,
         resizable: false,
+        minimizable: false,
+        closable: false,
         frame: true,
-        transparent: true,
         show: false,
-        autoHideMenuBar: true,
         alwaysOnTop: true,
         icon: `${__dirname}/assets/icon.png`,
         webPreferences: {
             nodeIntegration: true,
             contextIsolation: false,
             webSecurity: false,
-            //devTools: isDev,
-            webviewTag: true
+            devTools: false
         }
     });
-    splashscreen.menuBarVisible = false;
-    splashscreen.removeMenu();
     splashscreen.loadFile('splashscreen/index.html');
     splashscreen.once('ready-to-show', async()=>{
         splashscreen.show();
         await waitTo(5000);
         splashscreen.webContents.executeJavaScript('window.goStart()');
         goWindowApp();
-        await waitTo(4000);
-        appWindow.show();
         await waitTo(6000);
+        appWindow.show();
         splashscreen.hide();
     });
 }
@@ -68,7 +66,7 @@ function goWindowApp() {
             contextIsolation: false,
             webSecurity: false,
             devTools: isDev,
-            webviewTag: true
+            //webviewTag: true
         }
     });
     appWindow.menuBarVisible = false;
