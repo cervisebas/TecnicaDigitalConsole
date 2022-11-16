@@ -1,7 +1,7 @@
 import React, { Component } from 'react';
 import { ThemeProvider, Pivot, PivotItem } from '@fluentui/react';
 import { registerIcons, setIconOptions } from '@fluentui/react/lib/Styling';
-import { AcceptIcon, BackIcon, CancelIcon, ChromeBackIcon, ChromeBackMirroredIcon, RefreshIcon } from '@fluentui/react-icons-mdl2';
+import { AcceptIcon, CancelIcon } from '@fluentui/react-icons-mdl2';
 import { ToastContainer, toast } from 'react-toastify';
 import Theme from './Theme';
 import Console from './screens/console';
@@ -9,7 +9,6 @@ import Config from './screens/config';
 import ApiConsole from './scripts/ApiConsole';
 import 'react-toastify/dist/ReactToastify.css';
 import { ipcRenderer } from 'electron';
-import BrowserPage from './screens/browser';
 import SyncData from './scripts/SyncData';
 
 type IProps = {};
@@ -43,10 +42,10 @@ export default class App extends Component<IProps, IState> {
         AcceptIcon: <AcceptIcon />,
         CancelIcon: <CancelIcon />,
         // Browser
-        BackIcon: <BackIcon />,
+        /*BackIcon: <BackIcon />,
         ChromeBackIcon: <ChromeBackIcon />,
         ChromeBackMirroredIcon: <ChromeBackMirroredIcon />,
-        RefreshIcon: <RefreshIcon />
+        RefreshIcon: <RefreshIcon />*/
       }
     });
     setIconOptions({ disableWarnings: true });
@@ -80,13 +79,13 @@ export default class App extends Component<IProps, IState> {
           getTabId={this.getTabId}
           style={{ paddingLeft: 16, position: 'relative' }}>
           <PivotItem headerText="Consola" itemKey='console' />
-          <PivotItem headerText="Navegador WEB" itemKey='browser' />
-          <PivotItem headerText="Configuraciones" itemKey='config' />¿
+          {/*<PivotItem headerText="Navegador WEB" itemKey='browser' />*/}
+          <PivotItem headerText="Configuraciones" itemKey='config' />
         </Pivot>
         <div className={'custom-scroll'} id={'scroll-principal'} aria-labelledby={this.getTabId(this.state.selectKey)} role={'tabpanel'} style={{ width: '100%', height: '100%', backgroundColor: '#000000', overflowY: 'auto', overflowX: 'hidden', position: 'relative' }}>
           <Console style={{ display: (this.state.selectKey == 'console')? undefined: 'none' }} />
           <Config style={{ display: (this.state.selectKey == 'config')? undefined: 'none' }} />
-          <BrowserPage style={{ display: (this.state.selectKey == 'browser')? undefined: 'none' }} />
+          {/*<BrowserPage style={{ display: (this.state.selectKey == 'browser')? undefined: 'none' }} />*/}
         </div>
       </div>
       <ToastContainer
